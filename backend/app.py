@@ -2,6 +2,8 @@ import os
 from flask import Flask
 from flask_migrate import Migrate
 from models import db
+from routes.users import users_bp
+from routes.lists import lists_bp
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
@@ -10,8 +12,8 @@ app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 
 db.init_app(app)
 
-from routes.users import users_bp
 app.register_blueprint(users_bp)
+app.register_blueprint(lists_bp)
 
 migrate = Migrate(app, db)
 
