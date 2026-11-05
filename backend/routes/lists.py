@@ -57,7 +57,7 @@ def get_list(token):
         return jsonify({
             "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token},
             "needs_identity": True,
-            "existing_guest_names": [g.display_name for g in existing_guests]
+            "existing_guests": [{"id": g.id, "display_name": g.display_name} for g in existing_guests]
         }), 200
 
     return jsonify({
