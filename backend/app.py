@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from flask_migrate import Migrate
+from flask_cors import CORS
 from models import db
 from routes.users import users_bp
 from routes.lists import lists_bp
@@ -9,6 +10,8 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
+
+CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
 db.init_app(app)
 
