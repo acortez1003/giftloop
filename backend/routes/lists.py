@@ -51,7 +51,7 @@ def get_list(token):
     if not list_obj:
         return jsonify({"error": "list not found"}), 404
 
-    member = resolve_listmember()
+    member = resolve_listmember(list_obj.id)
     if not member:
         existing_guests = ListMember.query.filter_by(list_id=list_obj.id, user_id=None).all()
         return jsonify({

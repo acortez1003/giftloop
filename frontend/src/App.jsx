@@ -1,45 +1,16 @@
-import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Home from './pages/Home';
+import MyLists from './pages/MyLists';
+import ViewList from './pages/ViewList';
 
 function App() {
-  const [login, setLogin] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-
-  async function handleLogin(e) {
-    e.preventDefault();
-
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ login, password })
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      setMessage(`Logged in as ${data.username}`);
-    } else {
-      setMessage(data.error);
-    }
-  }
-
   return (
-    <form onSubmit={handleLogin}>
-      <input
-        placeholder="username or email"
-        value={login}
-        onChange={(e) => setLogin(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button type="submit">Log in</button>
-      <p>{message}</p>
-    </form>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/lists" element={<MyLists />} />
+      <Route path="/lists/:token" element={<ViewList />} />
+    </Routes>
   );
 }
 
