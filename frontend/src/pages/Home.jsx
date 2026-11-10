@@ -25,23 +25,29 @@ function Home() {
         const data = await res.json();
         navigate(`/lists/${data.token}`);
     }
-  
-  return (
-    <div>
-      <form onSubmit={handleCreateList}>
-        <input value={listName} onChange={(e) => setListName(e.target.value)} placeholder="List name" />
-        <button type="submit">Create List</button>
-      </form>
 
-      {showAuthPrompt && (
-        <AuthPromptModal 
-            onClose={() => setShowAuthPrompt(false)}
-            onLoginSuccess={(user) => {
-                console.log('Logged in as', user.username);
-            }}
-        />
-      )}
-    </div>
+    async function handleMyLists() {
+        navigate('/lists');
+    }
+  
+    return (
+        <div>
+            <h1>Welcome to GiftLoop</h1>
+            <button onClick={handleMyLists} type="submit">My Lists</button>
+            <form onSubmit={handleCreateList}>
+                <input value={listName} onChange={(e) => setListName(e.target.value)} placeholder="List name" />
+                <button type="submit">Create List</button>
+            </form>
+
+        {showAuthPrompt && (
+            <AuthPromptModal 
+                onClose={() => setShowAuthPrompt(false)}
+                onLoginSuccess={(user) => {
+                    console.log('Logged in as', user.username);
+                }}
+            />
+        )}
+        </div>
   );
 }
 

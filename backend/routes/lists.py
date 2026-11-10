@@ -108,8 +108,8 @@ def join_list(token):
     session[f'listmember_id_{list_obj.id}'] = new_guest.id
 
     return jsonify({
-            "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token},
-            "guest": {"id": existing_guest.id, "name": existing_guest.display_name}
+        "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token},
+        "guest": {"id": existing_guest.id, "name": existing_guest.display_name}
     }), 200
 
 def resolve_listmember(list_id):

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User
+from models import db, User, ListMember, List
 
 users_bp = Blueprint('users', __name__)
 
@@ -60,3 +60,46 @@ def get_current_user():
 
     user = User.query.get(user_id)
     return jsonify({"id": user.id, "username": user.username}), 200
+
+@users_bp.route('/api/users/me/lists', methods=['GET'])
+def get_user_lists():
+    user_id = session.get('user_id')
+
+    # registered user, might have personal lists
+    if user_id:
+        own_lists = (
+            db.session.query(List)
+            .join(ListMember, List.id == ListMember.list_id)
+            .filter(
+                ListMember.user_id == user_id,
+                List.recipient_listmember_id == ListMember.id
+            )
+            .all()
+        )
+        joined_lists = (
+            db.session.query(List)
+            .join(ListMember, List.id == ListMember.list_id)
+            .filter(
+                ListMember.user_id == user_id,
+                List.recipient_listmember_id != ListMember.id
+            )
+            .all()
+        )
+
+        return jsonify({
+            "own_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in own_lists],
+            "joined_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in joined_lists]
+        }), 200
+
+    # guest, only joined lists
+    guest_list_ids = []
+    for key in session.keys():
+        if key.startswith('listmember_id_'):
+            list_id = key.replace('listmember_id_', '')
+            guest_list_ids.append(int(list_id))
+
+    joined_lists = List.query.filter(List.id.in_(guest_list_ids)).all()
+
+    return  jsonify({
+        "joined_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in joined_lists]
+    }), 200
