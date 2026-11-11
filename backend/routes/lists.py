@@ -55,13 +55,13 @@ def get_list(token):
     if not member:
         existing_guests = ListMember.query.filter_by(list_id=list_obj.id, user_id=None).all()
         return jsonify({
-            "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token},
+            "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token, "recipient_id": list_obj.recipient_listmember_id},
             "needs_identity": True,
             "existing_guests": [{"id": g.id, "display_name": g.display_name} for g in existing_guests]
         }), 200
 
     return jsonify({
-        "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token},
+        "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token, "recipient_id": list_obj.recipient_listmember_id},
         "needs_identity": False,
         "your_member_id": member.id
     }), 200

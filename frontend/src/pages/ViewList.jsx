@@ -4,6 +4,9 @@ import { useParams } from 'react-router-dom';
 function ViewList() {
     const { token } = useParams();
     const [listData, setListData] = useState(null);
+    const [guestData, setGuestData] = useState(null);
+    const [userData, setUserData] = useState(null);
+    const [needsIdentity, setNeedsIdentity] = useState(false);
 
     useEffect(() => {
         async function fetchList() {
@@ -13,14 +16,32 @@ function ViewList() {
                 credentials: 'include'
             });
             const data = await res.json();
-            setListData(data);
+            setListData(data.list);
+            setNeedsIdentity(data.needs_identity);
+            setUserData(data.your_member_id);
+            setGuestData(data.existing_guests);
         }
         fetchList();
     }, [token]);
-
-    if  (!listData) return <p>Loading...</p>;
     
-    return <p>List page for {listData.list.name}</p>;
+    return (
+        <div>
+            {!listData ? (
+                <p>Loading...</p>
+            ) : needsIdentity ? (
+                <p>Choose a guest or enter your name</p>
+            ) : (
+                <div>
+                    <h1>Page for {listData.name}</h1>
+                    {listData.recipient_id === userData ? (
+                        <p>You are the recipient</p>
+                    ) : (
+                        <p>You are a list member</p>
+                    )}
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default ViewList;
