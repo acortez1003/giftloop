@@ -55,15 +55,19 @@ def get_list(token):
     if not member:
         existing_guests = ListMember.query.filter_by(list_id=list_obj.id, user_id=None).all()
         return jsonify({
-            "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token, "recipient_id": list_obj.recipient_listmember_id},
+            "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token},
             "needs_identity": True,
-            "existing_guests": [{"id": g.id, "display_name": g.display_name} for g in existing_guests]
+            "existing_guests": [{"id": g.id, "display_name": g.display_name} for g in existing_guests],
+            "is_recipient": False
         }), 200
+
+    is_recipient = member.id == list_obj.recipient_listmember_id
 
     return jsonify({
         "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token, "recipient_id": list_obj.recipient_listmember_id},
         "needs_identity": False,
-        "your_member_id": member.id
+        "your_member_id": member.id,
+        "is_recipient": is_recipient
     }), 200
 
 @lists_bp.route('/api/lists/<token>/join', methods=['POST'])
@@ -76,6 +80,7 @@ def join_list(token):
     if not data:
         return jsonify({"error": "data not provided"}), 400
 
+    # if user selects a guest from dropdown, add id to their session
     if data.get('existing_listmember_id'):
         existing_guest = ListMember.query.filter_by(
             id=data['existing_listmember_id'],
@@ -91,6 +96,7 @@ def join_list(token):
             "guest": {"id": existing_guest.id, "name": existing_guest.display_name}
         }), 200
 
+    # otherwise, new guest and needs to enter a name
     if not data.get('name'):
         return jsonify({"error": "name not provided"}), 400
 
@@ -109,7 +115,7 @@ def join_list(token):
 
     return jsonify({
         "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token},
-        "guest": {"id": existing_guest.id, "name": existing_guest.display_name}
+        "guest": {"id": new_guest.id, "name": new_guest.display_name}
     }), 200
 
 def resolve_listmember(list_id):

@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import GuestSelectionPromptModal from "../components/GuestSelectionPromptModal";
 
 function ViewList() {
     const { token } = useParams();
+    const [showGuestPrompt, setShowGuestPrompt] = useState(true);
     const [listData, setListData] = useState(null);
     const [guestData, setGuestData] = useState(null);
     const [userData, setUserData] = useState(null);
     const [needsIdentity, setNeedsIdentity] = useState(false);
+    const [isRecipient, setIsRecipient] = useState(false);
 
     useEffect(() => {
         async function fetchList() {
@@ -20,6 +23,7 @@ function ViewList() {
             setNeedsIdentity(data.needs_identity);
             setUserData(data.your_member_id);
             setGuestData(data.existing_guests);
+            setIsRecipient(data.is_recipient)
         }
         fetchList();
     }, [token]);
@@ -28,12 +32,19 @@ function ViewList() {
         <div>
             {!listData ? (
                 <p>Loading...</p>
-            ) : needsIdentity ? (
-                <p>Choose a guest or enter your name</p>
+            ) : needsIdentity && showGuestPrompt ? (
+                <GuestSelectionPromptModal
+                    token={token}
+                    existingGuests={guestData}
+                    onClose={() => setShowGuestPrompt(false)}
+                    onIdentitySuccess={member => {
+                        console.log('List member as', member.guest.name);
+                    }}
+                />
             ) : (
                 <div>
                     <h1>Page for {listData.name}</h1>
-                    {listData.recipient_id === userData ? (
+                    {isRecipient ? (
                         <p>You are the recipient</p>
                     ) : (
                         <p>You are a list member</p>
