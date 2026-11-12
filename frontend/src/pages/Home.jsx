@@ -45,6 +45,9 @@ function Home() {
                 onLoginSuccess={(user) => {
                     console.log('Logged in as', user.username);
                 }}
+                onRegisterSuccess={(user) => {
+                    console.log('Registered as', user.username)
+                }}
             />
         )}
         </div>

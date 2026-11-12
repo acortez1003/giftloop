@@ -71,6 +71,7 @@ function GuestSelectionPromptModal({ token, existingGuests, onClose, onIdentityS
                     />
                     <button type="submit">Enter</button>
                 </form>
+                {message && <p>{message}</p>}
             </div>
         </div>
     );
