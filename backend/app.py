@@ -5,6 +5,7 @@ from flask_cors import CORS
 from models import db
 from routes.users import users_bp
 from routes.lists import lists_bp
+from routes.gifts import gifts_bp
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
@@ -17,6 +18,7 @@ db.init_app(app)
 
 app.register_blueprint(users_bp)
 app.register_blueprint(lists_bp)
+app.register_blueprint(gifts_bp)
 
 migrate = Migrate(app, db)
 
