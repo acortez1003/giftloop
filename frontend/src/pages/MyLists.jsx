@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'
 
 function MyLists() {
+    const navigate = useNavigate()
     const [myLists, setMyLists] = useState(null);
     const [joinedLists, setJoinedLists] = useState(null);
 
@@ -18,13 +20,22 @@ function MyLists() {
         fetchMyLists();
     }, []);
 
+    async function handleViewList(token) {
+        navigate(`/lists/${token}`);
+    }
+
     return (
         <div>
             <h2>My Lists</h2>
             {myLists && myLists.length > 0 ? (
                 <ul>
                     {myLists.map((list) => (
-                        <li key={list.id}>{list.name}</li>
+                        <li key={list.id}>
+                            {list.name}
+                            <button onClick={() => handleViewList(list.token)}>
+                                View List
+                            </button>
+                        </li>
                     ))}
                 </ul>
             ) : (
@@ -35,7 +46,12 @@ function MyLists() {
             {joinedLists && joinedLists.length > 0 ? (
                 <ul>
                     {joinedLists.map((list) => (
-                        <li key={list.id}>{list.name}</li>
+                        <li key={list.id}>
+                            {list.name}
+                            <button onClick={() => handleViewList(list.token)}>
+                                View List
+                            </button>
+                        </li>
                     ))}
                 </ul>
             ) : (
