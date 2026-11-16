@@ -7,6 +7,7 @@ from routes.users import users_bp
 from routes.lists import lists_bp
 from routes.gifts import gifts_bp
 from routes.claims import claims_bp
+from routes.groups import groups_bp
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
@@ -21,6 +22,7 @@ app.register_blueprint(users_bp)
 app.register_blueprint(lists_bp)
 app.register_blueprint(gifts_bp)
 app.register_blueprint(claims_bp)
+app.register_blueprint(groups_bp)
 
 migrate = Migrate(app, db)
 
