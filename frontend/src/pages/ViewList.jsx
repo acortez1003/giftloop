@@ -63,6 +63,22 @@ function ViewList() {
             setMessage(data.error)
         }
     }
+
+    async function handleClaim(giftId, status) {
+
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/gifts/${giftId}/claims`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ status })
+        });
+
+        const data = await res.json()
+
+        if(!res.ok) {
+            setMessage(data.error)
+        }
+    }
     
     return (
         <div>
@@ -94,7 +110,15 @@ function ViewList() {
                     { giftData && giftData.length > 0 ? (
                         <ul>
                             {giftData.map((gift) => (
-                                <li key={gift.id}>{gift.name}</li>
+                                <li key={gift.id}>
+                                    {gift.name}
+                                    <button type="button" onClick={() => handleClaim(gift.id, "want_to_buy")}>
+                                        Want to Buy
+                                    </button>
+                                    <button type="button" onClick={() => handleClaim(gift.id, "bought")}>
+                                        Bought
+                                    </button>
+                                </li>
                             ))}
                         </ul>
                     ) : (

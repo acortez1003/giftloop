@@ -1,6 +1,7 @@
 from flask import session
 from models import db, ListMember
 
+# retrieves member object using list_id
 def resolve_listmember(list_id):
     user_id = session.get('user_id')
 
