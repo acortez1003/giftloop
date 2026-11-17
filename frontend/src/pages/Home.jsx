@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthPromptModal from "../components/AuthPromptModal";
+import GuestNamePromptModal from "../components/GuestNamePromptModal";
 
 function Home() {
     const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+    const [showGuestPrompt, setShowGuestPrompt] = useState(false);
+    const [pendingListToken, setPendingListToken] = useState(null);
     const [listName, setListName] = useState('');
     const navigate = useNavigate();
 
@@ -23,6 +26,13 @@ function Home() {
         }
 
         const data = await res.json();
+
+        if (data.needs_identity) {
+            setPendingListToken(data.token);
+            setShowGuestPrompt(true);
+            return;
+        }
+
         navigate(`/lists/${data.token}`);
     }
 
@@ -50,6 +60,17 @@ function Home() {
                 }}
             />
         )}
+
+        {showGuestPrompt && (
+            <GuestNamePromptModal
+                token={pendingListToken}
+                onClose={() => setShowGuestPrompt(false)}
+                onNameSuccess={(data) => {
+                    navigate(`/lists/${pendingListToken}`);
+                }}
+            />
+        )}
+
         </div>
   );
 }

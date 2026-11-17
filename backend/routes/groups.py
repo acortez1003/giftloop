@@ -5,28 +5,6 @@ from helpers import resolve_groupmember
 
 groups_bp = Blueprint('groups', __name__)
 
-@groups_bp.route('/api/groups/<token>', methods=['GET'])
-def get_group(token):
-    group_obj = Group.query.filter_by(token=token).first()
-
-    if not group_obj:
-        return jsonify({"error": "group not found"}), 404
-
-    member = resolve_groupmember(group_obj.id)
-    if not member:
-        existing_guests = GroupMember.query.filter_by(group_id=group_obj.id, user_id=None).all()
-        return jsonify({
-            "group": {"id": group_obj.id, "name": group_obj.name, "token": group_obj.token},
-            "needs_identity": True,
-            "existing_guests": [{"id": g.id, "display_name": g.display_name} for g in existing_guests],
-        }), 200
-
-    return jsonify({
-        "group": {"id": group_obj.id, "name": group_obj.name, "token": group_obj.token},
-        "needs_identity": False,
-        "your_member_id": member.id,
-    }), 200
-
 @groups_bp.route('/api/groups', methods=['POST'])
 def create_group():
     data = request.get_json()
@@ -108,4 +86,26 @@ def join_group(token):
     return jsonify({
         "group": {"id": group_obj.id, "name": group_obj.name, "token": group_obj.token},
         "guest": {"id": existing_guest.id, "name": existing_guest.display_name}
+    }), 200
+
+@groups_bp.route('/api/groups/<token>', methods=['GET'])
+def get_group(token):
+    group_obj = Group.query.filter_by(token=token).first()
+
+    if not group_obj:
+        return jsonify({"error": "group not found"}), 404
+
+    member = resolve_groupmember(group_obj.id)
+    if not member:
+        existing_guests = GroupMember.query.filter_by(group_id=group_obj.id, user_id=None).all()
+        return jsonify({
+            "group": {"id": group_obj.id, "name": group_obj.name, "token": group_obj.token},
+            "needs_identity": True,
+            "existing_guests": [{"id": g.id, "display_name": g.display_name} for g in existing_guests],
+        }), 200
+
+    return jsonify({
+        "group": {"id": group_obj.id, "name": group_obj.name, "token": group_obj.token},
+        "needs_identity": False,
+        "your_member_id": member.id,
     }), 200

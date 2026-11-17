@@ -55,8 +55,13 @@ def login_user():
 @users_bp.route('/api/me', methods=['GET'])
 def get_current_user():
     user_id = session.get('user_id')
+    guest_name = session.get('guest_name')
+
+    if guest_name:
+        return jsonify({"guest_name": guest_name}), 200
+
     if not user_id:
-        return jsonify({"error": "not logged in"}), 401
+        return jsonify({"error": "no assigned guest name and not logged in"}), 401
 
     user = User.query.get(user_id)
     return jsonify({"id": user.id, "username": user.username}), 200
