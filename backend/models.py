@@ -14,7 +14,7 @@ class ListMember(db.Model):
     __tablename__ = 'listmembers'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    list_id = db.Column(db.Integer, db.ForeignKey("lists.id"), nullable=False)
+    list_id = db.Column(db.Integer, db.ForeignKey("lists.id", ondelete="CASCADE"), nullable=False)
     display_name = db.Column(db.String(80))
 
 class List(db.Model):
@@ -36,13 +36,13 @@ class GroupMember(db.Model):
     __tablename__ = 'groupmembers'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id", ondelete="CASCADE"), nullable=False)
     display_name = db.Column(db.String(80))
 
 class Gift(db.Model):
     __tablename__ = 'gifts'
     id = db.Column(db.Integer, primary_key=True)
-    list_id = db.Column(db.Integer, db.ForeignKey("lists.id"), nullable=False)
+    list_id = db.Column(db.Integer, db.ForeignKey("lists.id", ondelete="CASCADE"), nullable=False)
     name = db.Column(db.String(80), nullable=False)
     price = db.Column(db.Numeric(10, 2))
     link = db.Column(db.String(225))
@@ -52,6 +52,6 @@ class Gift(db.Model):
 class Claim(db.Model):
     __tablename__ = 'claims'
     id = db.Column(db.Integer, primary_key=True)
-    gift_id = db.Column(db.Integer, db.ForeignKey("gifts.id"), nullable=False)
+    gift_id = db.Column(db.Integer, db.ForeignKey("gifts.id", ondelete="CASCADE"), nullable=False)
     listmember_id = db.Column(db.Integer, db.ForeignKey("listmembers.id"), nullable=False)
     status = db.Column(db.Enum("want_to_buy", "bought", name="claim_status"), nullable=False)

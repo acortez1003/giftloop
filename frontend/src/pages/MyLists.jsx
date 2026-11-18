@@ -13,7 +13,7 @@ function MyLists() {
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include'
             });
-            const data = await res.json()
+            const data = await res.json();
             setMyLists(data.owned_lists);
             setJoinedLists(data.joined_lists);
         }
@@ -24,6 +24,18 @@ function MyLists() {
         navigate(`/lists/${token}`);
     }
 
+    async function handleDeleteList(list_id) {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/lists/${list_id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+        const data = await res.json();
+        if(!res.ok) {
+            console.log(data.error);
+        }
+    }
+
     return (
         <div>
             <h2>My Lists</h2>
@@ -32,9 +44,8 @@ function MyLists() {
                     {myLists.map((list) => (
                         <li key={list.id}>
                             {list.name}
-                            <button onClick={() => handleViewList(list.token)}>
-                                View List
-                            </button>
+                            <button onClick={() => handleViewList(list.token)}>View List</button>
+                            <button onClick={() => handleDeleteList(list.id)}>Delete</button>
                         </li>
                     ))}
                 </ul>
