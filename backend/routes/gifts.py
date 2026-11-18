@@ -54,7 +54,7 @@ def add_gift(token):
 def delete_gift(gift_id):
     gift_obj = Gift.query.get(gift_id)
     if not gift_obj:
-        return jsonify({"error", "gift not found"}), 404
+        return jsonify({"error": "gift not found"}), 404
 
     list_obj = List.query.get(gift_obj.list_id)
     member = resolve_listmember(list_obj.id)

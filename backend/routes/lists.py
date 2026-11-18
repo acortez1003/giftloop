@@ -120,18 +120,18 @@ def join_list(token):
 def delete_list(list_id):
     list_obj = List.query.get(list_id)
     if not list_obj:
-        return jsonify({"error", "list not found"}), 404
+        return jsonify({"error": "list not found"}), 404
 
     member = resolve_listmember(list_obj.id)
     if not member or member.id != list_obj.recipient_listmember_id:
-        return jsonify({"error", "unauthorized to delete this list"}), 401
+        return jsonify({"error": "unauthorized to delete this list"}), 401
 
     try:
         db.session.delete(list_obj)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error", "could not delete list"}), 500
+        return jsonify({"error": "could not delete list"}), 500
 
     return jsonify({"message": "list deleted"}), 200
 

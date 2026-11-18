@@ -10,6 +10,11 @@ def get_gift_claims(gift_id):
     if not gift_obj:
         return jsonify({"error": "gift not found"}), 404
 
+    list_obj = List.query.get(gift_obj.list_id)
+    user = resolve_listmember(list_obj.id)
+    if not list_obj or user.id == list_obj.recipient_listmember_id:
+        return jsonify({"error:": "unauthorized to get claims"}), 401
+
     claims = Claim.query.filter_by(gift_id=gift_obj.id).all()
 
     return jsonify({

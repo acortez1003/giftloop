@@ -79,6 +79,11 @@ function ViewList() {
             setMessage(data.error)
         }
     }
+
+    async function handleDelete(giftId) {
+
+        return;
+    }
     
     return (
         <div>
@@ -107,17 +112,27 @@ function ViewList() {
                     ) : (
                         <p>You are a list member</p>
                     )}
-                    { giftData && giftData.length > 0 ? (
+                    {giftData && giftData.length > 0 ? (
                         <ul>
                             {giftData.map((gift) => (
                                 <li key={gift.id}>
                                     {gift.name}
-                                    <button type="button" onClick={() => handleClaim(gift.id, "want_to_buy")}>
-                                        Want to Buy
-                                    </button>
-                                    <button type="button" onClick={() => handleClaim(gift.id, "bought")}>
-                                        Bought
-                                    </button>
+                                    {isRecipient ? (
+                                        <>
+                                        <button type="button" onClick={() => handleDelete(gift.id)}>
+                                            Delete
+                                        </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                        <button type="button" onClick={() => handleClaim(gift.id, "want_to_buy")}>
+                                            Want to Buy
+                                        </button>
+                                        <button type="button" onClick={() => handleClaim(gift.id, "bought")}>
+                                            Bought
+                                        </button>
+                                        </>
+                                    )}
                                 </li>
                             ))}
                         </ul>
