@@ -55,11 +55,6 @@ def login_user():
 @users_bp.route('/api/me', methods=['GET'])
 def get_current_user():
     user_id = session.get('user_id')
-    guest_name = session.get('guest_name')
-
-    if guest_name:
-        return jsonify({"guest_name": guest_name}), 200
-
     if not user_id:
         return jsonify({"error": "no assigned guest name and not logged in"}), 401
 
@@ -70,41 +65,29 @@ def get_current_user():
 def get_user_lists():
     user_id = session.get('user_id')
 
-    # registered user, might have personal lists
-    if user_id:
-        own_lists = (
-            db.session.query(List)
-            .join(ListMember, List.id == ListMember.list_id)
-            .filter(
-                ListMember.user_id == user_id,
-                List.recipient_listmember_id == ListMember.id
-            )
-            .all()
-        )
-        joined_lists = (
-            db.session.query(List)
-            .join(ListMember, List.id == ListMember.list_id)
-            .filter(
-                ListMember.user_id == user_id,
-                List.recipient_listmember_id != ListMember.id
-            )
-            .all()
-        )
-
-        return jsonify({
-            "own_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in own_lists],
-            "joined_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in joined_lists]
-        }), 200
-
-    # guest, only joined lists
-    guest_list_ids = []
-    for key in session.keys():
+    guest_member_ids_by_list = {}
+    for key, value in session.items():
         if key.startswith('listmember_id_'):
-            list_id = key.replace('listmember_id_', '')
-            guest_list_ids.append(int(list_id))
+            list_id = int(key.replace('listmember_id_', ''))
+            guest_member_ids_by_list[list_id] = value
 
-    joined_lists = List.query.filter(List.id.in_(guest_list_ids)).all()
+    if user_id:
+        memberships = ListMember.query.filter_by(user_id=user_id).all()
+        list_ids = [m.list_id for m in memberships]
+        lists_by_id = {l.id: l for l in List.query.filter(List.id.in_(list_ids)).all()}
+        pairs = [(lists_by_id[m.list_id], m.id) for m in memberships]
+    else:  # guest
+        lists = List.query.filter(List.id.in_(guest_member_ids_by_list.keys())).all()
+        pairs = [(l, guest_member_ids_by_list[l.id]) for l in lists]
+
+    own, joined = [], []
+    for list_obj, member_id in pairs:
+        if list_obj.recipient_listmember_id == member_id:
+            own.append(list_obj)
+        else:
+            joined.append(list_obj)
 
     return  jsonify({
-        "joined_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in joined_lists]
+        "owned_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in own],
+        "joined_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in joined]
     }), 200

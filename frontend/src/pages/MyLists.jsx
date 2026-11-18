@@ -14,7 +14,7 @@ function MyLists() {
                 credentials: 'include'
             });
             const data = await res.json()
-            setMyLists(data.own_lists);
+            setMyLists(data.owned_lists);
             setJoinedLists(data.joined_lists);
         }
         fetchMyLists();
