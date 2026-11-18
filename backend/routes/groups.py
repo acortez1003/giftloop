@@ -88,6 +88,25 @@ def join_group(token):
         "guest": {"id": existing_guest.id, "name": existing_guest.display_name}
     }), 200
 
+@groups_bp.route('/api/groups/<group_id>', methods=['DELETE'])
+def delete_group(group_id):
+    group_obj = Group.query.get(group_id)
+    if not group_obj:
+        return jsonify({"error", "group not found"}), 404
+
+    user_id = session.get('user_id')
+    if not user_id or user_id != group_obj.owner_id:
+        return jsonify({"error", "unauthorized to delete group"}), 401
+
+    try:
+        db.session.delete(group_obj)
+        db.session.commit
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error", "could not delete group"}), 500
+
+    return jsonify({"message", "group deleted"}), 200
+
 @groups_bp.route('/api/groups/<token>', methods=['GET'])
 def get_group(token):
     group_obj = Group.query.filter_by(token=token).first()

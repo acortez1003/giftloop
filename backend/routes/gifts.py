@@ -49,3 +49,23 @@ def add_gift(token):
         return jsonify({"error": "could not add gift"}), 500
 
     return jsonify({"id": new_gift.id, "name": new_gift.name}), 201
+
+@gifts_bp.route('/api/gifts/<gift_id>', methods=['DELETE'])
+def delete_gift(gift_id):
+    gift_obj = Gift.query.get(gift_id)
+    if not gift_obj:
+        return jsonify({"error", "gift not found"}), 404
+
+    list_obj = List.query.get(gift_obj.list_id)
+    member = resolve_listmember(list_obj.id)
+    if not member or member.id != list_obj.recipient_listmember_id:
+        return jsonify({"error", "unauthorized to delete gift"}), 401
+
+    try:
+        db.session.delete(gift_obj)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error", "could not delete gift"}), 500
+
+    return jsonify({"message": "gift deleted"}), 200
