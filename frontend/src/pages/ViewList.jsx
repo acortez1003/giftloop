@@ -82,7 +82,16 @@ function ViewList() {
 
     async function handleDelete(giftId) {
 
-        return;
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/gifts/${giftId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+        });
+
+        const data = await res.json()
+        if(!res.ok) {
+            setMessage(data.error)
+        }
     }
     
     return (

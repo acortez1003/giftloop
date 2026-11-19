@@ -38,6 +38,19 @@ def add_claim(gift_id):
     if not data or not data.get('status'):
         return jsonify({"error": "please make valid claim"}), 400
 
+    # toggle status
+    claim_obj = Claim.query.filter_by(gift_id=gift_obj.id, listmember_id=member.id).first()
+    if claim_obj:
+        current_status = claim_obj.status
+        try:
+            db.session.delete(claim_obj)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": "could not edit claim"}), 500
+        if data['status'] == current_status:
+            return jsonify({"message": "claim removed"}), 201
+
     try:
         new_claim = Claim(
             gift_id = gift_obj.id,
