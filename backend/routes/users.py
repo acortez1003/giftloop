@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, ListMember, List
+from models import db, User, ListMember, List, GroupMember, Group
 
 users_bp = Blueprint('users', __name__)
 
@@ -90,4 +90,36 @@ def get_user_lists():
     return  jsonify({
         "owned_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in own],
         "joined_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in joined]
+    }), 200
+
+@users_bp.route('/api/users/me/groups', methods=['GET'])
+def get_user_groups():
+    user_id = session.get('user_id')
+
+    if not user_id: # guest
+        guest_group_ids = []
+        for key in session.keys():
+            if key.startswith('groupmember_id_'):
+                group_id = key.replace('groupmember_id_', '')
+                guest_group_ids.append(int(group_id))
+        joined = Group.query.filter(Group.id.in_(guest_group_ids)).all()
+        return jsonify({
+            "joined_groups": [{"id": g.id, "name": g.name, "token": g.token} for g in joined]
+        }), 200
+
+    memberships = GroupMember.query.filter_by(user_id=user_id).all()
+    group_ids = [m.group_id for m in memberships]
+    groups_by_id = {g.id: g for g in Group.query.filter(Group.id.in_(group_ids)).all()}
+    pairs = [(groups_by_id[m.group_id], m.id) for m in memberships]
+
+    own, joined = [], []
+    for group_obj, member_id in pairs:
+        if group_obj.owner_id == member_id:
+            own.append(group_obj)
+        else:
+            joined.append(group_obj)
+
+    return  jsonify({
+        "owned_groups": [{"id": g.id, "name": g.name, "token": g.token} for g in own],
+        "joined_groups": [{"id": g.id, "name": g.name, "token": g.token} for g in joined]
     }), 200

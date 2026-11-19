@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function GuestNamePromptModal({ token, onClose, onNameSuccess }) {
+function GuestNamePromptModal({ joinUrl, onClose, onNameSuccess }) {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
 
@@ -12,7 +12,7 @@ function GuestNamePromptModal({ token, onClose, onNameSuccess }) {
       return;
     }
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/lists/${token}/join`, {
+    const res = await fetch(joinUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

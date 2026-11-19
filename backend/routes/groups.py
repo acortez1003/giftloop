@@ -39,8 +39,9 @@ def create_group():
     return jsonify({
         "id": new_group.id,
         "owner_id": new_group.owner_id,
-        "group_name": new_group.name,
-        "token": new_group.token
+        "name": new_group.name,
+        "token": new_group.token,
+        "needs_identity": not bool(user_id)
     }), 201
 
 @groups_bp.route('/api/groups/<token>/join', methods=['POST'])
