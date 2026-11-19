@@ -114,7 +114,7 @@ def get_user_groups():
 
     own, joined = [], []
     for group_obj, member_id in pairs:
-        if group_obj.owner_id == member_id:
+        if group_obj.owner_id == user_id:
             own.append(group_obj)
         else:
             joined.append(group_obj)
