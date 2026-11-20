@@ -152,11 +152,38 @@ def get_list(token):
             "is_recipient": False
         }), 200
 
+    if member.user_id:
+        user = User.query.get(member.user_id)
+        name = user.display_name
+    else:
+        name = member.display_name
+
     is_recipient = member.id == list_obj.recipient_listmember_id
 
     return jsonify({
         "list": {"id": list_obj.id, "name": list_obj.name, "token": list_obj.token, "recipient_id": list_obj.recipient_listmember_id},
         "needs_identity": False,
         "your_member_id": member.id,
+        "your_display_name": name,
         "is_recipient": is_recipient
+    }), 200
+
+@lists_bp.route('/api/groups/<token>/lists', methods=['GET'])
+def get_group_lists(token):
+    group_obj = Group.query.filter_by(token=token).first()
+
+    if not group_obj:
+        return jsonify({"error": "group not found"}), 404
+
+    lists = List.query.filter_by(group_id=group_obj.id)
+
+    my_list_id = None
+    for l in lists:
+        member = resolve_listmember(l.id)
+        if member.id == l.recipient_listmember_id:
+            my_list_id = l.id
+
+    return jsonify({
+        "lists": [{"id": l.id, "name": l.name, "recipient_id": l.recipient_listmember_id, "token": l.token} for l in lists],
+        "my_list_id": my_list_id
     }), 200

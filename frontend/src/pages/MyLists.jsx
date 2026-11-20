@@ -215,8 +215,8 @@ function MyLists() {
                     {myGroups.map((group) => (
                         <li key={group.id}>
                             {group.name}
-                            <button onClick={() => handleViewList(group.token)}>View List</button>
-                            <button onClick={() => handleDeleteList(group.id)}>Delete</button>
+                            <button onClick={() => handleViewGroup(group.token)}>View Group</button>
+                            <button onClick={() => handleDeleteGroup(group.id)}>Delete</button>
                         </li>
                     ))}
                 </ul>
@@ -229,7 +229,7 @@ function MyLists() {
                     {joinedGroups.map((group) => (
                         <li key={group.id}>
                             {group.name}
-                            <button onClick={() => handleViewList(group.token)}>
+                            <button onClick={() => handleViewGroup(group.token)}>
                                 View Group
                             </button>
                         </li>

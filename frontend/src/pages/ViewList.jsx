@@ -58,8 +58,9 @@ function ViewList() {
         });
 
         const data = await res.json()
-
-        if (!res.ok) {
+        if (res.ok) {
+            setGiftData((prev) => [...prev, data]);
+        } else {
             setMessage(data.error)
         }
     }
@@ -89,9 +90,11 @@ function ViewList() {
         });
 
         const data = await res.json()
-        if(!res.ok) {
-            setMessage(data.error)
-        }
+        if (res.ok) {
+            setGiftData((prev) => prev.filter((g) => g.id !== giftId));
+        } else (
+            console.log(data.error)
+        )
     }
     
     return (
