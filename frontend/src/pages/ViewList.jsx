@@ -57,11 +57,11 @@ function ViewList() {
             body: JSON.stringify( { name: giftName })
         });
 
-        const data = await res.json()
+        const data = await res.json();
         if (res.ok) {
             setGiftData((prev) => [...prev, data]);
         } else {
-            setMessage(data.error)
+            setMessage(data.error);
         }
     }
 
@@ -103,7 +103,7 @@ function ViewList() {
                 <p>Loading...</p>
             ) : needsIdentity && showGuestPrompt ? (
                 <GuestSelectionPromptModal
-                    token={token}
+                    joinUrl={`${import.meta.env.VITE_API_URL}/api/lists/${token}/join`}
                     existingGuests={guestData}
                     onClose={() => setShowGuestPrompt(false)}
                     onIdentitySuccess={member => {

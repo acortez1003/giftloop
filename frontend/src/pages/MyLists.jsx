@@ -13,9 +13,7 @@ function MyLists() {
     const [joinedGroups, setJoinedGroups] = useState(null);
     const [myGroups, setMyGroups] = useState(null);
     const [groupName, setGroupName] = useState('');
-    const [pendingGroupToken, setPendingGroupToken] = useState(null);
 
-    const [pendingJoinType, setPendingJoinType] = useState(null);
     const [showAuthPrompt, setShowAuthPrompt] = useState(false);
     const [showGuestPrompt, setShowGuestPrompt] = useState(false);
 
@@ -110,13 +108,6 @@ function MyLists() {
 
         const data = await res.json();
 
-        if (data.needs_identity) {
-            setPendingGroupToken(data.token);
-            setPendingJoinType('group');
-            setShowGuestPrompt(true);
-            return;
-        }
-
         navigate(`/groups/${data.token}`);
     }
 
@@ -145,18 +136,10 @@ function MyLists() {
 
             {showGuestPrompt && (
             <GuestNamePromptModal
-                joinUrl={
-                pendingJoinType === 'group'
-                    ? `${import.meta.env.VITE_API_URL}/api/groups/${pendingGroupToken}/join`
-                    : `${import.meta.env.VITE_API_URL}/api/lists/${pendingListToken}/join`
-                }
+                token={pendingListToken}
                 onClose={() => setShowGuestPrompt(false)}
-                onNameSuccess={() => {
-                if (pendingJoinType === 'group') {
-                    navigate(`/groups/${pendingGroupToken}`);
-                } else {
+                onNameSuccess={(data) => {
                     navigate(`/lists/${pendingListToken}`);
-                }
                 }}
             />
             )}

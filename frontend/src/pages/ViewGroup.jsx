@@ -10,6 +10,7 @@ function ViewGroup() {
     const [memberListData, setMemberListData] = useState(null);
     const [myListData, setMyListData] = useState(null);
     const [showGuestPrompt, setShowGuestPrompt] = useState(true);
+    const [listName, setListName] = useState('');
 
     useEffect(() => {
         async function fetchGroup() {
@@ -40,13 +41,30 @@ function ViewGroup() {
         fetchLists();
     }, [token]);
 
+    async function handleCreateList(e) {
+        e.preventDefault();
+
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/lists`, {
+            method: ['POST'],
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name: listName, group_id: groupData.id})
+        });
+        const data = await res.json();
+        if (res.ok) {
+            setMyListData((prev) => [...prev, data]);
+        } else {
+            console.log(data.error);
+        }
+    }
+
     return (
         <div>
             {!groupData ? (
                 <p>Loading...</p>
             ) : needsIdentity && showGuestPrompt ? (
                 <GuestSelectionPromptModal
-                    token={token}
+                    joinUrl={`${import.meta.env.VITE_API_URL}/api/groups/${token}/join`}
                     existingGuests={guestData}
                     onClose={() => setShowGuestPrompt(false)}
                     onIdentitySuccess={member => {
@@ -60,7 +78,13 @@ function ViewGroup() {
                     { myListData ? (
                         <p>{myListData.name}</p>
                     ) : (
+                        <div>
                         <p>You don't have a list for this group yet.</p>
+                        <form onSubmit={handleCreateList}>
+                            <input value={listName} onChange={(e) => setListName(e.target.value)} placeholder="List name" />
+                            <button type="submit">Create List</button>
+                        </form>
+                        </div>
                     )}
                     <h3>Group Member Lists</h3>
                     { memberListData && memberListData.length > 0 ? (

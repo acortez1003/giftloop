@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function GuestSelectionPromptModal({ token, existingGuests, onClose, onIdentitySuccess }) {
+function GuestSelectionPromptModal({ joinUrl, existingGuests, onClose, onIdentitySuccess }) {
     const [existingGuest, setExistingGuest] = useState(null);
     const [message, setMessage] = useState('');
     const [displayName, setDisplayName] = useState('');
@@ -8,7 +8,7 @@ function GuestSelectionPromptModal({ token, existingGuests, onClose, onIdentityS
     async function handleSelectExisting(e) {
         e.preventDefault();
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/lists/${token}/join`, {
+        const res = await fetch(joinUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -28,7 +28,7 @@ function GuestSelectionPromptModal({ token, existingGuests, onClose, onIdentityS
     async function handleNewGuest(e) {
         e.preventDefault();
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/lists/${token}/join`, {
+        const res = await fetch(joinUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',

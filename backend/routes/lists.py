@@ -13,8 +13,25 @@ def create_list():
     if not data or not data.get('name'):
         return jsonify({"error": "list name not provided"}), 400
 
+    if data.get('group_id'):
+        group_id = data['group_id']
+        lists = List.query.filter_by(group_id=group_id).all()
+        for l in lists:
+            if not l.recipient_listmember_id:
+                continue
+
+            if user_id:
+                recipient = ListMember.query.get(l.recipient_listmember_id)
+                if recipient.user_id == user_id:
+                    return jsonify({"error": "can only have one list per group"}), 409
+            else:
+                guest_id = session.get(f'listmember_id_{l.id}')
+                if l.recipient_listmember_id == guest_id:
+                    return jsonify({"error": "can only have one list per group"}), 409
+
     try:
         new_list = List(
+            group_id=data['group_id'],
             name=data['name'],
             token=secrets.token_urlsafe(16)
         )
@@ -37,6 +54,7 @@ def create_list():
 
     return jsonify({
         "id": new_list.id,
+        "group_id": new_list.group_id,
         "name": new_list.name,
         "token": new_list.token,
         "needs_identity": not bool(user_id)
@@ -177,7 +195,7 @@ def get_group_lists(token):
     lists = List.query.filter_by(group_id=group_obj.id).all()
 
     user_id = session.get('user_id')
-    
+
     my_list = None
     member_lists = []
 
