@@ -7,8 +7,8 @@ function ViewGroup() {
     const [groupData, setGroupData] = useState(null);
     const [needsIdentity, setNeedsIdentity] = useState(false);
     const [guestData, setGuestData] = useState(null);
-    const [listData, setListData] = useState(null);
-    const [myListId, setMyListId] = useState(null);
+    const [memberListData, setMemberListData] = useState(null);
+    const [myListData, setMyListData] = useState(null);
     const [showGuestPrompt, setShowGuestPrompt] = useState(true);
 
     useEffect(() => {
@@ -34,8 +34,8 @@ function ViewGroup() {
                 credentials: 'include'
             });
             const data = await res.json();
-            setListData(data.lists);
-            setMyListId(data.my_list_id);
+            setMyListData(data.my_list);
+            setMemberListData(data.member_lists);
         }
         fetchLists();
     }, [token]);
@@ -56,9 +56,15 @@ function ViewGroup() {
             ) : (
                 <div>
                     <h1>Page for {groupData.name}</h1>
-                    <h3>My list</h3>
-                    { listData && listData.length > 0 ? (
-                        <p>There is list  data</p>
+                    <h3>My List</h3>
+                    { myListData ? (
+                        <p>{myListData.name}</p>
+                    ) : (
+                        <p>You don't have a list for this group yet.</p>
+                    )}
+                    <h3>Group Member Lists</h3>
+                    { memberListData && memberListData.length > 0 ? (
+                        <p>There is list data</p>
                     ) : (
                         <p>No list data</p>
                     )}

@@ -171,19 +171,32 @@ def get_list(token):
 @lists_bp.route('/api/groups/<token>/lists', methods=['GET'])
 def get_group_lists(token):
     group_obj = Group.query.filter_by(token=token).first()
-
     if not group_obj:
         return jsonify({"error": "group not found"}), 404
 
-    lists = List.query.filter_by(group_id=group_obj.id)
+    lists = List.query.filter_by(group_id=group_obj.id).all()
 
-    my_list_id = None
+    user_id = session.get('user_id')
+    
+    my_list = None
+    member_lists = []
+
     for l in lists:
-        member = resolve_listmember(l.id)
-        if member.id == l.recipient_listmember_id:
-            my_list_id = l.id
+        is_mine = False
+        if l.recipient_listmember_id:
+            if user_id:
+                recipient = ListMember.query.get(l.recipient_listmember_id)
+                is_mine = recipient.user_id == user_id
+            else:
+                guest_id = session.get(f'listmember_id_{l.id}')
+                is_mine = guest_id == l.recipient_listmember_id
+
+        if is_mine:
+            my_list = l
+        else:
+            member_lists.append(l)
 
     return jsonify({
-        "lists": [{"id": l.id, "name": l.name, "recipient_id": l.recipient_listmember_id, "token": l.token} for l in lists],
-        "my_list_id": my_list_id
+        "my_list": {"id": my_list.id, "name": my_list.name, "token": my_list.token} if my_list else None,
+        "member_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in member_lists]
     }), 200
