@@ -77,6 +77,7 @@ def join_group(token):
             group_id=group_obj.id,
             display_name=data['name']
         )
+        db.session.add(new_guest)
         db.session.commit()
     except Exception as e:
         db.session.rollback()

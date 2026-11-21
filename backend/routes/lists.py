@@ -31,7 +31,7 @@ def create_list():
 
     try:
         new_list = List(
-            group_id=data['group_id'],
+            group_id=data.get('group_id'),
             name=data['name'],
             token=secrets.token_urlsafe(16)
         )

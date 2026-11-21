@@ -12,7 +12,7 @@ function GuestSelectionPromptModal({ joinUrl, existingGuests, onClose, onIdentit
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ existing_listmember_id: existingGuest})
+            body: JSON.stringify({ existing_listmember_id: existingGuest })
         });
 
         const data = await res.json();
@@ -32,7 +32,7 @@ function GuestSelectionPromptModal({ joinUrl, existingGuests, onClose, onIdentit
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ name: displayName})
+            body: JSON.stringify({ name: displayName })
         });
 
         const data = await res.json();
