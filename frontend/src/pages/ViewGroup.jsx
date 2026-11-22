@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import GuestSelectionPromptModal from "../components/GuestSelectionPromptModal";
 
 function ViewGroup() {
+    const navigate = useNavigate();
     const { token } = useParams();
     const [groupData, setGroupData] = useState(null);
     const [needsIdentity, setNeedsIdentity] = useState(false);
@@ -58,6 +59,10 @@ function ViewGroup() {
         }
     }
 
+    async function handleViewList(token) {
+        navigate(`/lists/${token}`);
+    }
+
     return (
         <div>
             {!groupData ? (
@@ -88,7 +93,14 @@ function ViewGroup() {
                     )}
                     <h3>Group Member Lists</h3>
                     { memberListData && memberListData.length > 0 ? (
-                        <p>There is list data</p>
+                        <ul>
+                            {memberListData.map((list) => (
+                                <li key={list.id}>
+                                    {list.name}
+                                    <button type="button" onClick={() => handleViewList(list.token)}>View List</button>
+                                </li>
+                            ))}
+                        </ul>
                     ) : (
                         <p>No list data</p>
                     )}

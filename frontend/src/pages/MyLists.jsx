@@ -4,7 +4,7 @@ import AuthPromptModal from "../components/AuthPromptModal";
 import GuestNamePromptModal from "../components/GuestNamePromptModal";
 
 function MyLists() {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const [myLists, setMyLists] = useState(null);
     const [joinedLists, setJoinedLists] = useState(null);
     const [listName, setListName] = useState('');

@@ -1,5 +1,5 @@
 from flask import session
-from models import db, ListMember, GroupMember
+from models import db, List, ListMember, GroupMember
 
 # retrieves member object using list_id
 def resolve_listmember(list_id):
@@ -31,6 +31,22 @@ def resolve_listmember(list_id):
             return guest_member
 
     # new guest / id not found
+    list_obj = List.query.get(list_id)
+    # guest is coming from a group, lazy add
+    if list_obj.group_id:
+        groupmember_id = session.get(f'groupmember_id_{list_obj.group_id}')
+        if groupmember_id:
+            groupmember_obj = GroupMember.query.get(groupmember_id)
+            if groupmember_obj:
+                new_listmember = ListMember(
+                    list_id=list_id,
+                    display_name=groupmember_obj.display_name
+                )
+                db.session.add(new_listmember)
+                db.session.commit()
+                session[f'listmember_id_{list_id}'] = new_listmember.id
+                return new_listmember
+
     return None
 
 def resolve_groupmember(group_id):

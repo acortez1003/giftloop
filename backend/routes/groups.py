@@ -87,7 +87,7 @@ def join_group(token):
 
     return jsonify({
         "group": {"id": group_obj.id, "name": group_obj.name, "token": group_obj.token},
-        "guest": {"id": existing_guest.id, "name": existing_guest.display_name}
+        "guest": {"id": new_guest.id, "name": new_guest.display_name}
     }), 200
 
 @groups_bp.route('/api/groups/<group_id>', methods=['DELETE'])
