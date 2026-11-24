@@ -118,10 +118,13 @@ function MyLists() {
     async function handleDeleteGroup(group_id) {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/groups/${group_id}`, {
             method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
         });
-        const data = await res.json();
-        if (!res.ok) {
+        if(res.ok) {
+            setMyGroups((prev) => prev.filter((g) => g.id !== group_id));
+        } else {
+            const data = await res.json();
             console.log(data.error);
         }
     }

@@ -1,5 +1,5 @@
 from flask import session
-from models import db, List, ListMember, GroupMember
+from models import db, User, List, ListMember, GroupMember
 
 # retrieves member object using list_id
 def resolve_listmember(list_id):
@@ -76,3 +76,9 @@ def resolve_groupmember(group_id):
             return guest_member
 
     return None
+
+def get_display_name(member):
+    if member.user_id:
+        user = User.query.get(member.user_id)
+        return user.display_name
+    return member.display_name

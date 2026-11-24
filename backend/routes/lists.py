@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from models import db, User, ListMember, List, Group, GroupMember, Gift, Claim
 import secrets
-from helpers import resolve_listmember
+from helpers import resolve_listmember, get_display_name
 
 lists_bp = Blueprint('lists', __name__)
 
@@ -9,12 +9,19 @@ lists_bp = Blueprint('lists', __name__)
 def create_list():
     data = request.get_json()
     user_id = session.get('user_id')
-
     if not data or not data.get('name'):
         return jsonify({"error": "list name not provided"}), 400
 
-    if data.get('group_id'):
-        group_id = data['group_id']
+    group_id = data.get('group_id')
+    guest_group_member = None
+
+    if group_id and not user_id:
+        groupmember_id = session.get(f'groupmember_id_{group_id}')
+        if not groupmember_id:
+            return jsonify({"error": "must join group before creating a list in it"}), 401
+        guest_group_member = GroupMember.query.get(groupmember_id)
+
+    if group_id:
         lists = List.query.filter_by(group_id=group_id).all()
         for l in lists:
             if not l.recipient_listmember_id:
@@ -31,7 +38,7 @@ def create_list():
 
     try:
         new_list = List(
-            group_id=data.get('group_id'),
+            group_id=group_id,
             name=data['name'],
             token=secrets.token_urlsafe(16)
         )
@@ -39,13 +46,21 @@ def create_list():
         db.session.flush()
 
         if user_id:
+            new_listmember = ListMember(user_id=user_id, list_id=new_list.id)
+        elif guest_group_member:
             new_listmember = ListMember(
-                user_id=user_id,
-                list_id=new_list.id
+                list_id=new_list.id,
+                display_name=get_display_name(guest_group_member)
             )
+        else:
+            new_listmember = None
+
+        if new_listmember:
             db.session.add(new_listmember)
             db.session.flush()
             new_list.recipient_listmember_id = new_listmember.id
+            if not user_id:
+                session[f'listmember_id_{new_list.id}'] = new_listmember.id
 
         db.session.commit()
     except Exception as e:
@@ -57,7 +72,7 @@ def create_list():
         "group_id": new_list.group_id,
         "name": new_list.name,
         "token": new_list.token,
-        "needs_identity": not bool(user_id)
+        "needs_identity": not bool(user_id or guest_group_member)
     }), 201
 
 
@@ -170,11 +185,7 @@ def get_list(token):
             "is_recipient": False
         }), 200
 
-    if member.user_id:
-        user = User.query.get(member.user_id)
-        name = user.display_name
-    else:
-        name = member.display_name
+    name = get_display_name(member)
 
     is_recipient = member.id == list_obj.recipient_listmember_id
 
@@ -216,5 +227,5 @@ def get_group_lists(token):
 
     return jsonify({
         "my_list": {"id": my_list.id, "name": my_list.name, "token": my_list.token} if my_list else None,
-        "member_lists": [{"id": l.id, "name": l.name, "token": l.token} for l in member_lists]
+        "member_lists": [{"id": l.id, "name": l.name, "owner_name": get_display_name(ListMember.query.get(l.recipient_listmember_id)), "token": l.token} for l in member_lists]
     }), 200

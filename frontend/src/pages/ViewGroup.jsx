@@ -7,22 +7,23 @@ function ViewGroup() {
     const { token } = useParams();
     const [groupData, setGroupData] = useState(null);
     const [needsIdentity, setNeedsIdentity] = useState(false);
+    const [myData, setMyData] = useState(null);
     const [guestData, setGuestData] = useState(null);
     const [memberListData, setMemberListData] = useState(null);
     const [myListData, setMyListData] = useState(null);
     const [showGuestPrompt, setShowGuestPrompt] = useState(true);
-    const [listName, setListName] = useState('');
 
     useEffect(() => {
         async function fetchGroup() {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/groups/${token}`, {
-                method: ['GET'],
+                method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include'
             });
             const data = await res.json();
             setGroupData(data.group);
             setNeedsIdentity(data.needs_identity);
+            setMyData(data.your_data);
             setGuestData(data.existing_guests);
         }
         fetchGroup();
@@ -31,7 +32,7 @@ function ViewGroup() {
     useEffect(() => {
         async function fetchLists() {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/groups/${token}/lists`, {
-                method: ['GET'],
+                method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include'
             });
@@ -42,25 +43,33 @@ function ViewGroup() {
         fetchLists();
     }, [token]);
 
-    async function handleCreateList(e) {
-        e.preventDefault();
-
+    async function handleCreateList(group_id, name) {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/lists`, {
-            method: ['POST'],
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ name: listName, group_id: groupData.id})
+            body: JSON.stringify({ name: name, group_id: group_id})
         });
         const data = await res.json();
-        if (res.ok) {
-            setMyListData((prev) => [...prev, data]);
-        } else {
+        if (!res.ok) {
             console.log(data.error);
-        }
+        } 
     }
 
     async function handleViewList(token) {
         navigate(`/lists/${token}`);
+    }
+
+    async function handleDeleteList(list_id) {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/lists/${list_id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            console.log(data.error);
+        } 
     }
 
     return (
@@ -81,14 +90,17 @@ function ViewGroup() {
                     <h1>Page for {groupData.name}</h1>
                     <h3>My List</h3>
                     { myListData ? (
-                        <p>{myListData.name}</p>
+                        <li>
+                        {myData.name}
+                        <button onClick={() => handleViewList(myListData.token)}>View List</button>
+                        <button onClick={() => handleDeleteList(myListData.id)}>Delete</button>
+                        </li>
                     ) : (
                         <div>
                         <p>You don't have a list for this group yet.</p>
-                        <form onSubmit={handleCreateList}>
-                            <input value={listName} onChange={(e) => setListName(e.target.value)} placeholder="List name" />
-                            <button type="submit">Create List</button>
-                        </form>
+                        <button onClick={() => handleCreateList(groupData.id, `${groupData.name} - ${myData.name}`)}>
+                            Create List
+                        </button>
                         </div>
                     )}
                     <h3>Group Member Lists</h3>
@@ -96,7 +108,7 @@ function ViewGroup() {
                         <ul>
                             {memberListData.map((list) => (
                                 <li key={list.id}>
-                                    {list.name}
+                                    {list.owner_name}
                                     <button type="button" onClick={() => handleViewList(list.token)}>View List</button>
                                 </li>
                             ))}

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from models import db, User, ListMember, List, Group, GroupMember, Gift, Claim
 import secrets
-from helpers import resolve_groupmember
+from helpers import resolve_groupmember, get_display_name
 
 groups_bp = Blueprint('groups', __name__)
 
@@ -102,7 +102,7 @@ def delete_group(group_id):
 
     try:
         db.session.delete(group_obj)
-        db.session.commit
+        db.session.commit()
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "could not delete group"}), 500
@@ -125,8 +125,10 @@ def get_group(token):
             "existing_guests": [{"id": g.id, "display_name": g.display_name} for g in existing_guests],
         }), 200
 
+    name = get_display_name(member)
+
     return jsonify({
         "group": {"id": group_obj.id, "name": group_obj.name, "token": group_obj.token},
         "needs_identity": False,
-        "your_member_id": member.id,
+        "your_data":{"id":  member.id, "name": name}
     }), 200
